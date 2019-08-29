@@ -2,9 +2,8 @@
 >Base on java language to parse elf file
 
 ### usage
-- : elfparse <option(s)> elf-file
-
-
+- java -jar elfparse.jar <option(s)> elf-file
+``` option
     -h --file-header       Display the ELF file header
     -l --program-headers   Display the program headers
      --segments          An alias for --program-headers
@@ -18,3 +17,4 @@
     -r --rodata             Display the rodata constant
     -H --help              Display this information
     -v --version           Display the version number of elfparse
+```
