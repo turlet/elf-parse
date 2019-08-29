@@ -2,3 +2,20 @@
 *.iml
 .idea/*
 **/out/
+
+# Gradle
+.gradle/
+bin/
+
+# Build
+**/build/
+
+# Eclipse
+*.project
+*.classpath
+*.settings
+*.setting
+
+# Tmp Files
+*~
+*.DS_Store
