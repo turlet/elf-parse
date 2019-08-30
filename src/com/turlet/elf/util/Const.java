@@ -12,5 +12,5 @@ public interface Const {
     int SH_NAME_LENGTH = 20;
     int SH_TYPE_LENGTH = 18;
 
-    String VERSION = "v1.0";
+    String VERSION = "v1.1";
 }

@@ -203,7 +203,7 @@ public class Elf32Parse {
             fileChannel.read(interpBuf);
             interperterString = new String(interpBuf.array());
         }
-        
+
         if(CommandParser.getInstance().isProgramHeaders()) {
             ElfProgramHeader32.printTableTitle();
             programHeaders.stream().forEach(program -> {
