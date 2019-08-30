@@ -61,7 +61,10 @@ public class Main {
             parse.parseElfProgramHeaderTable();
         } else if (magic.ei_class == EI_CLASS.ELFCLASS64) {
             //进入64位解析器
-            Log.e("64位还没有实现");
+            Elf64Parse parse = new Elf64Parse(fileChannel, magic);
+            parse.parseElfHeader();
+            parse.parseElfSectionHeaderTable();
+            parse.parseElfProgramHeaderTable();
         } else {
             //无法解析
             Log.e(EI_CLASS.get(magic.ei_class));

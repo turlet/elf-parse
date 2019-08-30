@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * Create by Silen((myemail)) on 2019/8/27 11:27
  */
-public class SectionParse {
+public class SectionParse32 {
 
     private List<ElfSectionHeader32> sectionHeaders;
 
@@ -30,7 +30,7 @@ public class SectionParse {
     //.rodata保存了只读数据，可以读取但不能修改，例如printf语句中的所有静态字符串封装到该节。
     private List<String> rodataList;
 
-    public SectionParse(FileChannel fileChannel, List<ElfSectionHeader32> sectionHeaders) {
+    public SectionParse32(FileChannel fileChannel, List<ElfSectionHeader32> sectionHeaders) {
         this.fileChannel = fileChannel;
         this.sectionHeaders = sectionHeaders;
     }

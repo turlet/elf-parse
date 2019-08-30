@@ -2,6 +2,8 @@ package com.turlet.elf;
 
 import com.turlet.elf.bean.*;
 import com.turlet.elf.comm.PH_TYPE;
+import com.turlet.elf.comm.SH_FLAG;
+import com.turlet.elf.comm.SH_TYPE;
 import com.turlet.elf.util.CommandParser;
 import com.turlet.elf.util.Log;
 
@@ -15,38 +17,36 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Create by Silen((myemail)) on 2019/8/23 10:21
+ * Create by Silen() on 2019/8/29 18:48
  */
-public class Elf32Parse {
+public class Elf64Parse {
 
     private FileChannel fileChannel;
 
     private Magic magic;
 
-    private ElfHeader32 header;
+    private ElfHeader64 header;
 
+    private List<ElfSectionHeader64> sectionHeaders;
 
-    private List<ElfSectionHeader32> sectionHeaders;
-
-    private List<ElfProgramHeader32> programHeaders;
+    private List<ElfProgramHeader64> programHeaders;
 
     private String interperterString;
 
-    public Elf32Parse(FileChannel fileChannel, Magic magic) {
+    public Elf64Parse(FileChannel fileChannel, Magic magic) {
         this.fileChannel = fileChannel;
         this.magic = magic;
     }
 
     public void parseElfHeader() throws IOException {
-        //Log.i(Arrays.toString(headerBuf.array()));
         fileChannel.position(0);
-        ByteBuffer headerBuf = ByteBuffer.allocate(Elf32.ELF_HDR_LENGTH);
+        ByteBuffer headerBuf = ByteBuffer.allocate(Elf64.ELF_HDR_LENGTH);
         fileChannel.read(headerBuf);
 
-        headerBuf.position(Elf32.EI_NIDENT);
+        headerBuf.position(Elf64.EI_NIDENT);
 
-        //这里本来可以直接转换成com.turlet.elf.bean.ElfHeader32对象，但为了更好的体现elf格式的结构
-        Elf32.Elf32_Ehdr ehdr = new Elf32.Elf32_Ehdr();
+        //这里本来可以直接转换成com.turlet.elf.bean.ElfHeader64对象，但为了更好的体现elf格式的结构
+        Elf64.Elf64_Ehdr ehdr = new Elf64.Elf64_Ehdr();
         headerBuf.get(ehdr.e_type);
         headerBuf.get(ehdr.e_machine);
         headerBuf.get(ehdr.e_version);
@@ -60,8 +60,7 @@ public class Elf32Parse {
         headerBuf.get(ehdr.e_shentsize);
         headerBuf.get(ehdr.e_shnum);
         headerBuf.get(ehdr.e_shstrndx);
-        header = ElfHeader32.parse(magic, ehdr);
-
+        header = ElfHeader64.parse(magic, ehdr);
         //根据参数判断是否打印
         if(CommandParser.getInstance().isFileHeader()) {
             header.print();
@@ -75,7 +74,7 @@ public class Elf32Parse {
      */
     public void parseElfSectionHeaderTable() throws IOException {
         if(!(CommandParser.getInstance().isSectionHeaders() || CommandParser.getInstance().isDynSyms()
-                || CommandParser.getInstance().isRodata())) {
+                || CommandParser.getInstance().isRodata()|| CommandParser.getInstance().isNotes())) {
             return;
         }
         if(Objects.isNull(header)){
@@ -85,14 +84,14 @@ public class Elf32Parse {
         fileChannel.position(header.e_shoff);
 
         sectionHeaders = new ArrayList<>(header.e_shnum);
-        ElfSectionHeader32 sh;
-        Elf32.Elf32_Shdr shdr;
+        ElfSectionHeader64 sh;
+        Elf64.Elf64_Shdr shdr;
         for (int i = 0; i < header.e_shnum; i++){
             ByteBuffer shBuf = ByteBuffer.allocate(header.e_shentsize);
             fileChannel.read(shBuf);
             shBuf.rewind();
 
-            shdr = new Elf32.Elf32_Shdr();
+            shdr = new Elf64.Elf64_Shdr();
             shBuf.get(shdr.sh_name);
             shBuf.get(shdr.sh_type);
             shBuf.get(shdr.sh_flags);
@@ -104,20 +103,21 @@ public class Elf32Parse {
             shBuf.get(shdr.sh_addralign);
             shBuf.get(shdr.sh_entsize);
 
-            sh = ElfSectionHeader32.parse(shdr);
+            sh = ElfSectionHeader64.parse(shdr);
             sectionHeaders.add(sh);
         }
 
         //字符串表保存着一系列以NULL结尾的的字符串
-        ElfSectionHeader32 shstrtab = sectionHeaders.get(sectionHeaders.size()-1);
+        ElfSectionHeader64 shstrtab = sectionHeaders.get(sectionHeaders.size()-1);
+
         fileChannel.position(shstrtab.sh_offset);
-        ByteBuffer shBuf = ByteBuffer.allocate(shstrtab.sh_size);
+        ByteBuffer shBuf = ByteBuffer.allocate(new Long(shstrtab.sh_size).intValue());
         fileChannel.read(shBuf);
         shBuf.rewind();
 
         //重新计算值对应的打印值
         sectionHeaders = sectionHeaders.stream().map(header -> {
-            shBuf.position(header.sh_name);
+            shBuf.position(Long.valueOf(header.sh_name).intValue());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             for (; ; ) {
                 byte s = shBuf.get();
@@ -127,18 +127,17 @@ public class Elf32Parse {
                     break;
                 }
             }
-
             return header;
         }).collect(Collectors.toList());
 
         if(CommandParser.getInstance().isSectionHeaders()) {
-            ElfSectionHeader32.printTableTitle();
-            sectionHeaders.stream().forEach(ElfSectionHeader32::print);
-            ElfSectionHeader32.printInfo();
+            ElfSectionHeader64.printTableTitle();
+            sectionHeaders.stream().forEach(ElfSectionHeader64::print);
+            ElfSectionHeader64.printInfo();
         }
 
         // .dynsym：该section包含了动态链接符号表；其实该section是elf32_sym结构体数组
-        SectionParse32 sectionParse= new SectionParse32(fileChannel,sectionHeaders);
+        SectionParse64 sectionParse= new SectionParse64(fileChannel,sectionHeaders);
 
         if(CommandParser.getInstance().isDynSyms()) {
             sectionParse.parseDymStr();
@@ -169,43 +168,44 @@ public class Elf32Parse {
 
         programHeaders = new ArrayList<>(header.e_phnum);
 
-        Elf32.Elf32_Phdr phdr;
-        ElfProgramHeader32 ph;
-        ElfProgramHeader32 interpPh = null;
+        Elf64.Elf64_Phdr phdr;
+        ElfProgramHeader64 ph;
+        ElfProgramHeader64 interpPh = null;
 
         for (int i = 0; i < header.e_phnum; i++) {
             ByteBuffer phBuf = ByteBuffer.allocate(header.e_phentsize);
             fileChannel.read(phBuf);
             phBuf.rewind();
 
-            phdr = new Elf32.Elf32_Phdr();
+            phdr = new Elf64.Elf64_Phdr();
             phBuf.get(phdr.p_type);
+            phBuf.get(phdr.p_flags);
             phBuf.get(phdr.p_offset);
             phBuf.get(phdr.p_vaddr);
             phBuf.get(phdr.p_paddr);
             phBuf.get(phdr.p_filesz);
             phBuf.get(phdr.p_memsz);
-            phBuf.get(phdr.p_flags);
             phBuf.get(phdr.p_align);
 
-            ph = ElfProgramHeader32.parse(phdr);
+            ph = ElfProgramHeader64.parse(phdr);
             programHeaders.add(ph);
 
             if(PH_TYPE.PHT_INTERP == ph.p_type){
                 interpPh = ph;
             }
         }
-        if(interpPh != null) {
+        if(interpPh != null){
             //获取interp的数据内容
             //这个字符串是一个 ELF 解析器的路径
             fileChannel.position(interpPh.p_offset);
-            ByteBuffer interpBuf = ByteBuffer.allocate(interpPh.p_filesz);
+            ByteBuffer interpBuf = ByteBuffer.allocate(new Long(interpPh.p_filesz).intValue());
             fileChannel.read(interpBuf);
             interperterString = new String(interpBuf.array());
         }
-        
+
+
         if(CommandParser.getInstance().isProgramHeaders()) {
-            ElfProgramHeader32.printTableTitle();
+            ElfProgramHeader64.printTableTitle();
             programHeaders.stream().forEach(program -> {
                 program.print();
                 if (PH_TYPE.PHT_INTERP == program.p_type) {

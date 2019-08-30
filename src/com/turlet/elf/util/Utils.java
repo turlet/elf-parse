@@ -33,8 +33,9 @@ public class Utils {
         if(src == null || src.length != 4){
             throw new IllegalArgumentException("bytes 参数长度必需为4");
         }
-        return (src[0] & 0xFF) | ((src[1] & 0xFF) << 8) | ((src[2] & 0xFFFF) << 16) | ((src[3] & 0xFFFFFF) << 24);
+        return (src[0] & 0xFF) | ((src[1] & 0xFF) << 8) | ((src[2] & 0xFF) << 16) | ((src[3] & 0xFF) << 24);
     }
+
     /**
      * 把长度为4的byte数据按小端的方式转化成long
      * @param src
@@ -44,7 +45,20 @@ public class Utils {
         if(src == null || src.length != 4){
             throw new IllegalArgumentException("bytes 参数长度必需为4");
         }
-        return (src[0] & 0xFF) | ((src[1] & 0xFF) << 8) | ((src[2] & 0xFFFF) << 16) | ((src[3] & 0xFFFFFF) << 24);
+        return (src[0] & 0xFF) | ((src[1] & 0xFF) << 8) | ((src[2] & 0xFF) << 16) | (((long)(src[3]) & 0xFF) << 24);
+    }
+
+    /**
+     * 把长度为4的byte数据按小端的方式转化成long
+     * @param src
+     * @return
+     */
+    public static long byte8ToLong(byte[] src){
+        if(src == null || src.length != 8){
+            throw new IllegalArgumentException("bytes 参数长度必需为8");
+        }
+        return (src[0] & 0xFF) | ((src[1] & 0xFF) << 8) | ((src[2] & 0xFF) << 16) | ((src[3] & 0xFF) << 24)
+                | ((src[3] & 0xFF) << 32 | ((src[3] & 0xFF) << 40)| ((src[3] & 0xFF) << 48)| ((src[3] & 0xFF) << 56) );
     }
 
 
@@ -62,15 +76,15 @@ public class Utils {
         }
     }
 
-    public static String join(Collection var0, String var1) {
-        StringBuffer var2 = new StringBuffer();
+    public static String join(Collection var0, String value) {
+        StringBuilder builder = new StringBuilder();
 
-        for(Iterator var3 = var0.iterator(); var3.hasNext(); var2.append((String)var3.next())) {
-            if (var2.length() != 0) {
-                var2.append(var1);
+        for(Iterator var3 = var0.iterator(); var3.hasNext(); builder.append((String)var3.next())) {
+            if (builder.length() != 0) {
+                builder.append(value);
             }
         }
 
-        return var2.toString();
+        return builder.toString();
     }
 }

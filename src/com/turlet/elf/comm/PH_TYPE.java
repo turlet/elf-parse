@@ -46,27 +46,27 @@ public class PH_TYPE {
         map.put(PHT_NOTE, "NOTE(4)");
         map.put(PHT_SHLIB, "SHLIB(5)");
         map.put(PHT_PHDR, "PHDR(6)");
-        map.put(PHT_TLS, "LOOS(1)");
-        map.put(PHT_LOOS, "HIOS(1)");
-        map.put(PHT_HIOS, "LOPROC(1)");
+        map.put(PHT_TLS, "LOOS(7)");
+        map.put(PHT_LOOS, "HIOS(0x60000000)");
+        map.put(PHT_HIOS, "LOPROC(0x6fffffff)");
 //        map.put(PHT_LOPROC, "HIPROC(1)");
-        map.put(PHT_HIPROC, "HIPROC(1)");
+        map.put(PHT_HIPROC, "HIPROC(0x7fffffff)");
 //        map.put(PHT_GNU_EH_FRAME, "GNU_EH_FRAME(1)");
 //        map.put(PHT_SUNW_EH_FRAME, "SUNW_EH_FRAME(1)");
-        map.put(PHT_SUNW_UNWIND, "SUNW_UNWIND(1)");
-        map.put(PHT_GNU_STACK, "GNU_STACK(1)");
-        map.put(PHT_GNU_RELRO, "GNU_RELRO(1)");
-        map.put(PHT_OPENBSD_RANDOMIZE, "OPENBSD_RANDOMIZE(1)");
-        map.put(PHT_OPENBSD_WXNEEDED, "OPENBSD_WXNEEDED(1)");
-        map.put(PHT_OPENBSD_BOOTDATA, "OPENBSD_BOOTDATA(1)");
-        map.put(PHT_ARM_ARCHEXT, "ARCHEXT(1)");
-        map.put(PHT_ARM_EXIDX, "EXIDX(1)");
+        map.put(PHT_GNU_EH_FRAME, "GNU_EH_FRAME(0x6474e550)");
+        map.put(PHT_GNU_STACK, "GNU_STACK(0x6474e551)");
+        map.put(PHT_GNU_RELRO, "GNU_RELRO(0x6474e552)");
+        map.put(PHT_OPENBSD_RANDOMIZE, "OPENBSD_RANDOMIZE(0x65a3dbe6)");
+        map.put(PHT_OPENBSD_WXNEEDED, "OPENBSD_WXNEEDED(0x65a3dbe7)");
+        map.put(PHT_OPENBSD_BOOTDATA, "OPENBSD_BOOTDATA(0x65a41be6)");
+        map.put(PHT_ARM_ARCHEXT, "ARCHEXT(0x70000000)");
+        map.put(PHT_ARM_EXIDX, "EXIDX(0x70000001)");
 //        map.put(PHT_ARM_UNWIND, "UNWIND(1)");
         //还没处理其它cpu的类型
 //        map.put(PHT_MIPS_REGINFO, "MIPS_REGINFO(1)");
 //        map.put(PHT_MIPS_RTPROC, "MIPS_RTPROC(1)");
-        map.put(PHT_MIPS_OPTIONS, "MIPS_OPTIONS(1)");
-        map.put(PHT_MIPS_ABIFLAGS, "MIPS_ABIFLAGS(1)");
+        map.put(PHT_MIPS_OPTIONS, "MIPS_OPTIONS(0x70000002)");
+        map.put(PHT_MIPS_ABIFLAGS, "MIPS_ABIFLAGS(0x70000003)");
     }
 
     public static String get(Long type){

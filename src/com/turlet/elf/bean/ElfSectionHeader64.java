@@ -17,21 +17,21 @@ import com.turlet.elf.util.Utils;
  * 目标文件中可能包含非活动空间(INACTIVE SPACE)。这些区域不属于任何头部和节区，其内容未指定.
  * </pre>
  */
-public class ElfSectionHeader32 {
+public class ElfSectionHeader64 {
 
     //给出节区名称。是节区头部字符串表节区(Section Header StringTable Section)的索引。名字是一个 NULL 结尾的字符串。
-    public int sh_name;
+    public long sh_name;
     //为节区的内容和语义进行分类。参见节区类型。
     public long sh_type;
     //节区支持 1 位形式的标志，这些标志描述了多种属性。
-    public int sh_flags;
+    public long sh_flags;
     //如果节区将出现在进程的内存映像中，此成员给出节区的第一个字节应处的位置。否则，此字段为 0。
     public long sh_addr;
     //此成员的取值给出节区的第一个字节与文件头之间的偏移.
     public long sh_offset;
     //长度为4位，先不考虑符号问题
     //此成员给出节区的长度(字节数)。
-    public int sh_size;
+    public long sh_size;
     //此成员给出节区头部表索引链接。其具体的解释依赖于节区类型
     public long sh_link;
     //此成员给出附加信息，其解释依赖于节区类型。
@@ -51,22 +51,22 @@ public class ElfSectionHeader32 {
     //记录输出当前数组位置
     private static int index = 0;
 
-    public static ElfSectionHeader32 parse(Elf32.Elf32_Shdr shdr){
+    public static ElfSectionHeader64 parse(Elf64.Elf64_Shdr shdr){
 
-        ElfSectionHeader32 header = new ElfSectionHeader32();
+        ElfSectionHeader64 header = new ElfSectionHeader64();
         header.sh_name = Utils.byte4ToInt(shdr.sh_name);
         header.sh_type = Utils.byte4ToLong(shdr.sh_type);
-        header.sh_flags = Utils.byte4ToInt(shdr.sh_flags);
-        header.sh_addr = Utils.byte4ToLong(shdr.sh_addr);
-        header.sh_offset = Utils.byte4ToLong(shdr.sh_offset);
-        header.sh_size = Utils.byte4ToInt(shdr.sh_size);
+        header.sh_flags = Utils.byte8ToLong(shdr.sh_flags);
+        header.sh_addr = Utils.byte8ToLong(shdr.sh_addr);
+        header.sh_offset = Utils.byte8ToLong(shdr.sh_offset);
+        header.sh_size = Utils.byte8ToLong(shdr.sh_size);
         header.sh_link = Utils.byte4ToLong(shdr.sh_link);
         header.sh_info = Utils.byte4ToLong(shdr.sh_info);
-        header.sh_addralign = Utils.byte4ToLong(shdr.sh_addralign);
-        header.sh_entsize = Utils.byte4ToLong(shdr.sh_entsize);
+        header.sh_addralign = Utils.byte8ToLong(shdr.sh_addralign);
+        header.sh_entsize = Utils.byte8ToLong(shdr.sh_entsize);
 
         header.type = SH_TYPE.get(header.sh_type);
-        header.flags = SH_FLAG.get(header.sh_flags);
+        header.flags = SH_FLAG.get(Long.valueOf(header.sh_flags).intValue());
 
         //重置下标
         index = 0;
@@ -76,7 +76,7 @@ public class ElfSectionHeader32 {
 
 
     public static void printTableTitle(){
-        Log.i("[Nr] Name                 Type               Addr     Off    Size   ES Flg Lk Inf Al");
+        Log.i("[Nr] Name                 Type               Addr             Off      Size             EntSize          Flg  Lk Inf Al");
     }
 
     public static void printInfo(){
@@ -90,12 +90,13 @@ public class ElfSectionHeader32 {
     public void print(){
         Log.i("["+(index > 9 ? index : " "+ index)+"] "+ Utils.formatValue(name, Const.SH_NAME_LENGTH," ",true) +"  "+
                 Utils.formatValue(type, Const.SH_TYPE_LENGTH," ",true) +" "+
-                Utils.formatValue(Long.toHexString(sh_addr),8,"0",false)+" "+
-                Utils.formatValue(Long.toHexString(sh_offset),6,"0",false)+ " "+
-                Utils.formatValue(Long.toHexString(sh_size),6,"0",false) +" "+
-                Utils.formatValue(Long.toHexString(sh_entsize),2,"0",false) + " "+
+                Utils.formatValue(Long.toHexString(sh_addr),16,"0",false)+" "+
+                Utils.formatValue(Long.toHexString(sh_offset),8,"0",false)+ " "+
+                Utils.formatValue(Long.toHexString(sh_size),16,"0",false) +" "+
+                Utils.formatValue(Long.toHexString(sh_entsize),16,"0",false) + " "+
                 Utils.formatValue(flags,3," ",true)+ "  "+
-                sh_link + "  "+ sh_info+ "  "+sh_addralign);
+                Utils.formatValue(String.valueOf(sh_link),2," ",true) + "  "+
+                Utils.formatValue(String.valueOf(sh_info),2," ",true) + "  "+sh_addralign);
         index++;
     }
 
